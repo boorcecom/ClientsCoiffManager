@@ -142,14 +142,19 @@ public class RendezVousActivity extends ActionBarActivity {
 
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode==1) {
-            Long tid=Long.parseLong(data.getStringExtra("selection"),10);
-            if(RTds.RdvTrvExists(Long.parseLong(rid,10),tid)) {
-                Toast.makeText(ctx, getString(R.string.travailExist) + ":" + data.getStringExtra("description"), Toast.LENGTH_SHORT).show();
-            } else {
-                RTds.createRdvTrv(Long.parseLong(rid, 10), tid);
-                Toast.makeText(ctx, getString(R.string.travailAjoute) + ":" + data.getStringExtra("description"), Toast.LENGTH_SHORT).show();
-                refreshTravauxList();
+        RTds.open();
+        Tds.open();
+        Rds.open();
+        if(data!=null) {
+            if (requestCode == 1) {
+                Long tid = Long.parseLong(data.getStringExtra("selection"), 10);
+                if (RTds.RdvTrvExists(Long.parseLong(rid, 10), tid)) {
+                    Toast.makeText(ctx, getString(R.string.travailExist) + ":" + data.getStringExtra("description"), Toast.LENGTH_SHORT).show();
+                } else {
+                    RTds.createRdvTrv(Long.parseLong(rid, 10), tid);
+                    Toast.makeText(ctx, getString(R.string.travailAjoute) + ":" + data.getStringExtra("description"), Toast.LENGTH_SHORT).show();
+                    refreshTravauxList();
+                }
             }
         }
     }

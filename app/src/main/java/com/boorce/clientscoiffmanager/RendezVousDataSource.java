@@ -108,8 +108,8 @@ public class RendezVousDataSource {
         RendezVous rendezVous = new RendezVous();
         rendezVous.setUid(cursor.getLong(0));
         rendezVous.setCid(cursor.getString(1));
-        rendezVous.setDate(cursor.getString(3));
-        rendezVous.setDescription(cursor.getString(4));
+        rendezVous.setDate(cursor.getString(2));
+        rendezVous.setDescription(cursor.getString(3));
         Tds.close();
         return rendezVous;
     }
