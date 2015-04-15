@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Clients Coiff Manager</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_travaux">Travaux…</string>
+    <string name="title_activity_client">Client Coiff Manager</string>
+    <string name="title_activity_client_work">Travaux effectués</string>
+    <string name="txt_addButton">Nouveau</string>
+    <string name="title_activity_travaux">Gestion des travaux</string>
+    <string name="menu_edit">Editer</string>
+    <string name="menu_delete">Supprimer</string>
+    <string name="Oui">Oui</string>
+    <string name="Non">Non</string>
+    <string name="DeleteRDV">Supprimer le rendez-vous ?</string>
+    <string name="RDVDeleted">Rendez-vous supprimé.</string>
+    <string name="DeleteTrv">Supprimer le type de travail ?</string>
+    <string name="TrvDeleted">Travail supprimé.</string>
+    <string name="title_activity_travail">Travail</string>
+    <string name="travailName">Intitulé du travail</string>
+    <string name="buttonSave">Sauvegarder</string>
+    <string name="editTravail">Edition du travail :</string>
+    <string name="ajoutTravail">Ajout d\'un travail :</string>
+    <string name="editSaved">Modifications sauvegardées.</string>
+    <string name="addSaved">Modifications ajoutées.</string>
+    <string name="unableTrvDelete">Travail encore utilisé, impossible de supprimer !</string>
+    <string name="title_activity_rendez_vous">Rendez Vous</string>
+    <string name="editRendezVous">Edition du rendezvous :</string>
+    <string name="ajoutRendezVous">Ajout d\'un rendezvous :</string>
+    <string name="travailAjoute">Travail ajouté</string>
+    <string name="AjoutTravailImpossible">Aucun travail sélectionné</string>
+    <string name="ajouterTravail">Ajouter un travail</string>
+    <string name="travailExist">Travail déjà dans la liste</string>
+</resources>
