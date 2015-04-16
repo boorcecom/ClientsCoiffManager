@@ -63,23 +63,26 @@ public class RendezVousListActivity extends ActionBarActivity {
 
         CTds=new RendezVousDataSource(this);
         CTds.open();
-        refreshRendezVousList();
 
+        // Ajout de l'édition en "one-click"
+        rendezVousList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                RendezVous rdv = (RendezVous) rendezVousList.getItemAtPosition(position);
+                editRendezVous(rdv.getUid());
+            }
+        });
+
+        refreshRendezVousList();
         registerForContextMenu(rendezVousList);
 
         // Bouton "Add"
-
+        // Sortie du code de lancement de l'Activity dans une méthode privée.
         (findViewById(R.id.RVL_addButton)).
                 setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // A CONSTRUIRE AVEC UNE ACTIVITY RendezVous et un Bundle
-                        // Ds Bundle => ClientId + ClientName
-                        Intent CW = new Intent(ctx, RendezVousActivity.class);
-                        CW.putExtra("clientID",clientID);
-                        CW.putExtra("clientName",clientName);
-                        startActivity(CW);
-
+                        addRendezVous();
                     }
                 });
 
@@ -129,18 +132,34 @@ public class RendezVousListActivity extends ActionBarActivity {
         }
     }
 
+    // Sortie du lancement de l'édition et de l'ajout
+    private void editRendezVous(Long uid) {
+        Intent CW = new Intent(ctx, RendezVousActivity.class);
+        CW.putExtra("rendezVousID",uid);
+        CW.putExtra("clientID",clientID);
+        CW.putExtra("clientName",clientName);
+        startActivity(CW);
+    }
+
+    private void addRendezVous() {
+        Intent CW = new Intent(ctx, RendezVousActivity.class);
+        CW.putExtra("clientID",clientID);
+        CW.putExtra("clientName",clientName);
+        startActivity(CW);
+    }
+
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         final String uid=((TextView) info.targetView.findViewById(R.id.uidText)).getText().toString();
         final String rdvDate=((TextView) info.targetView.findViewById(R.id.textText)).getText().toString();
         switch(item.getItemId()) {
+            case R.id.add:
+                addRendezVous();
+                refreshRendezVousList();
+                return true;
             case R.id.edit:
-                Intent CW = new Intent(ctx, RendezVousActivity.class);
-                CW.putExtra("rendezVousID",uid);
-                CW.putExtra("clientID",clientID);
-                CW.putExtra("clientName",clientName);
-                startActivity(CW);
+                editRendezVous(Long.parseLong(uid,10));
                 refreshRendezVousList();
                 return true;
             case R.id.delete:

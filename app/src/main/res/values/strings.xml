@@ -9,6 +9,7 @@
     <string name="title_activity_client_work">Travaux effectués</string>
     <string name="txt_addButton">Nouveau</string>
     <string name="title_activity_travaux">Gestion des travaux</string>
+    <string name="menu_add">Ajouter</string>
     <string name="menu_edit">Editer</string>
     <string name="menu_delete">Supprimer</string>
     <string name="Oui">Oui</string>
@@ -32,4 +33,6 @@
     <string name="AjoutTravailImpossible">Aucun travail sélectionné</string>
     <string name="ajouterTravail">Ajouter un travail</string>
     <string name="travailExist">Travail déjà dans la liste</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

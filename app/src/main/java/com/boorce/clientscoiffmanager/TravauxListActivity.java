@@ -112,14 +112,20 @@ public class TravauxListActivity extends ActionBarActivity {
         }
     }
 
+    // Ajout du bouton d'ajout.
+
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         final String uid=((TextView) info.targetView.findViewById(R.id.uidText)).getText().toString();
         final String travailName=((TextView) info.targetView.findViewById(R.id.textText)).getText().toString();
+        Intent CW = new Intent(ctx, TravailActivity.class);
         switch(item.getItemId()) {
+            case R.id.add:
+                startActivity(CW);
+                refreshTravauxList();
+                return true;
             case R.id.edit:
-                Intent CW = new Intent(ctx, TravailActivity.class);
                 CW.putExtra("travailID",uid);
                 startActivity(CW);
                 refreshTravauxList();
