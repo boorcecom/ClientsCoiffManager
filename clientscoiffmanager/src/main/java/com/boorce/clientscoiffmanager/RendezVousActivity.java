@@ -35,7 +35,8 @@ public class RendezVousActivity extends ActionBarActivity {
     Context ctx;
     private Long rid;
     private String clientName;
-    private String clientId;
+// passage de reférence cid à cname
+//    private String clientId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +62,8 @@ public class RendezVousActivity extends ActionBarActivity {
             extras = getIntent().getExtras();
             if(!(extras==null)&&(extras.containsKey("rendezVousID"))) {
                 rid= extras.getLong("rendezVousID");
-                clientId= extras.getString("clientID");
+// passage de reférence cid à cname
+//                clientId= extras.getString("clientID");
                 clientName= extras.getString("clientName");
                 this.setTitle(getString(R.string.editRendezVous)+"-"+clientName);
                 ((CheckBox) (findViewById(R.id.RV_editMode))).setChecked(true);
@@ -71,14 +73,16 @@ public class RendezVousActivity extends ActionBarActivity {
                 refreshTravauxList();
             } else {
                 if(!(extras==null)) {
-                    clientId = extras.getString("clientID");
+// passage de reférence cid à cname
+//                    clientId = extras.getString("clientID");
                     clientName = extras.getString("clientName");
                     this.setTitle(getString(R.string.ajoutRendezVous) + "-" + clientName);
                     rid = (long) 0;
                     Calendar date=Calendar.getInstance();
-                    dateRdv.setText(date.get(Calendar.DAY_OF_MONTH)
+// Inversion de la date pour le tri
+                    dateRdv.setText(date.get(Calendar.YEAR)
                             +"/"+(date.get(Calendar.MONTH)+1)
-                            +"/"+date.get(Calendar.YEAR));
+                            +"/"+date.get(Calendar.DAY_OF_MONTH));
                     ((CheckBox) (findViewById(R.id.RV_editMode))).setChecked(false);
                 } else {
                     end_activity();
@@ -86,7 +90,8 @@ public class RendezVousActivity extends ActionBarActivity {
             }
         } else {
             rid= Long.parseLong((String) savedInstanceState.getSerializable("rid"),10);
-            clientId= (String) savedInstanceState.getSerializable("clientId");
+// passage de reférence cid à cname
+//            clientId= (String) savedInstanceState.getSerializable("clientId");
             clientName= (String) savedInstanceState.getSerializable("clientName");
             this.setTitle((String) savedInstanceState.getSerializable("appTitle"));
             refreshTravauxList();
@@ -114,10 +119,11 @@ public class RendezVousActivity extends ActionBarActivity {
                 setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+// Inversion de la date pour le tri
                         String[] sDate=dateRdv.getText().toString().split("/");
-                        int jour= Integer.parseInt(sDate[0],10);
+                        int annee= Integer.parseInt(sDate[0],10);
                         int mois= Integer.parseInt(sDate[1],10);
-                        int annee= Integer.parseInt(sDate[2],10);
+                        int jour= Integer.parseInt(sDate[2],10);
 
                         // Launch Date Picker Dialog
                         DatePickerDialog dpd = new DatePickerDialog(ctx,
@@ -126,8 +132,8 @@ public class RendezVousActivity extends ActionBarActivity {
                                     @Override
                                     public void onDateSet(DatePicker view, int year,
                                                           int monthOfYear, int dayOfMonth) {
-                                        dateRdv.setText(dayOfMonth + "/"
-                                                + (monthOfYear + 1) + "/" + year);
+                                        dateRdv.setText(year + "/"
+                                                + (monthOfYear + 1) + "/" + dayOfMonth);
 
                                     }
                                 }, annee, mois-1, jour);
@@ -142,29 +148,34 @@ public class RendezVousActivity extends ActionBarActivity {
                 setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(((CheckBox) (findViewById(R.id.RV_editMode))).isChecked()) {
-                            updateRendezVous();
-                            Intent TL = new Intent(ctx, TravauxListActivity.class);
-                            TL.putExtra("requestMode","getTravail");
-                            startActivityForResult(TL,1);
-                        }else{
-                            saveRendezVous();
-                            Intent TL = new Intent(ctx, TravauxListActivity.class);
-                            TL.putExtra("requestMode","getTravail");
-                            // Bug: Création multiples d'un rendez vous lors de la première édition.
-                            // Correction => passer en mode édition l'activity !
-                            ((CheckBox) (findViewById(R.id.RV_editMode))).setChecked(true);
-                            startActivityForResult(TL, 1);
-                        }
+                        callAddTravaux();
                     }
                 });
         refreshTravauxList();
     }
 
+    private void callAddTravaux() {
+        if(((CheckBox) (findViewById(R.id.RV_editMode))).isChecked()) {
+            updateRendezVous();
+            Intent TL = new Intent(ctx, TravauxListActivity.class);
+            TL.putExtra("requestMode","getTravail");
+            startActivityForResult(TL,1);
+        }else{
+            saveRendezVous();
+            Intent TL = new Intent(ctx, TravauxListActivity.class);
+            TL.putExtra("requestMode","getTravail");
+            // Bug: Création multiples d'un rendez vous lors de la première édition.
+            // Correction => passer en mode édition l'activity !
+            ((CheckBox) (findViewById(R.id.RV_editMode))).setChecked(true);
+            startActivityForResult(TL, 1);
+        }
+    }
+
     // Evolution : on sort la mise à jour et la sauvegarde sous formes de méthodes privées
     private void saveRendezVous() {
         // Correction : inversion format date
-        RendezVous rdv=Rds.createRendezVous(clientId,
+// passage de reférence cid à cname
+        RendezVous rdv=Rds.createRendezVous(clientName,
                 dateRdv.getText().toString(),
                 descText.getText().toString());
         rid=rdv.getUid();
@@ -173,7 +184,8 @@ public class RendezVousActivity extends ActionBarActivity {
     private void updateRendezVous() {
         RendezVous rdv=new RendezVous();
         rdv.setUid(rid);
-        rdv.setCid(clientId);
+// passage de reférence cid à cname
+        rdv.setCName(clientName);
         // Correction : inversion format date
         rdv.setDate(dateRdv.getText().toString());
         rdv.setDescription(descText.getText().toString());
@@ -187,13 +199,10 @@ public class RendezVousActivity extends ActionBarActivity {
         if(data!=null) {
             if (requestCode == 1) {
                 Long tid = Long.parseLong(data.getStringExtra("selection"), 10);
-                if (RTds.RdvTrvExists(rid, tid)) {
-                    Toast.makeText(ctx, getString(R.string.travailExist) + ":" + data.getStringExtra("description"), Toast.LENGTH_SHORT).show();
-                } else {
-                    RTds.createRdvTrv(rid, tid);
-                    Toast.makeText(ctx, getString(R.string.travailAjoute) + ":" + data.getStringExtra("description"), Toast.LENGTH_SHORT).show();
-                    refreshTravauxList();
-                }
+                RTds.createRdvTrv(rid, tid);
+                Toast.makeText(ctx, getString(R.string.travailAjoute) + ":"
+                        + data.getStringExtra("description"), Toast.LENGTH_SHORT).show();
+                refreshTravauxList();
             }
             // Bug: Création multiples d'un rendez vous lors de la première édition.
             // Correction => passer en mode édition l'activity !
@@ -206,7 +215,7 @@ public class RendezVousActivity extends ActionBarActivity {
         super.onSaveInstanceState(state);
         state.putSerializable("rid", String.valueOf(rid));
         state.putSerializable("clientName", clientName);
-        state.putSerializable("clientId", clientId);
+//        state.putSerializable("clientId", clientId);
         state.putSerializable("appTitle",this.getTitle().toString());
     }
 
@@ -227,6 +236,7 @@ public class RendezVousActivity extends ActionBarActivity {
             }
             TravauxAdapter adapter = new TravauxAdapter(this, values);
             travauxList.setAdapter(adapter);
+            registerForContextMenu(travauxList);
         }
     }
 
@@ -270,7 +280,7 @@ public class RendezVousActivity extends ActionBarActivity {
         final String tid=((TextView) info.targetView.findViewById(R.id.uidText)).getText().toString();
         switch(item.getItemId()) {
             case R.id.delete:
-                RTds.deleteRdvTrv(rid, Long.parseLong(tid, 10));
+                RTds.deleteFirstRdvTrvFromRidTid(rid, Long.parseLong(tid, 10));
                 refreshTravauxList();
                 Toast.makeText(ctx, getString(R.string.TrvDeleted), Toast.LENGTH_SHORT).show();
                 return true;

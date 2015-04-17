@@ -20,7 +20,8 @@
         android:id="@+id/T_descriptionText"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
-        android:singleLine="true" />
+        android:singleLine="true"
+        android:background="@android:color/background_light" />
 
     <Button
         android:layout_width="wrap_content"

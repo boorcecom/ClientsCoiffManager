@@ -31,9 +31,11 @@ public class ClientActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 Cursor cData = (Cursor) clientList.getItemAtPosition(position);
-                String CID=cData.getString(0);
+// passage de reférence cid à cname
+//                String CID=cData.getString(0);
                 String cName=cData.getString(1);
-                launchClientWork(CID, cName);
+// passage de reférence cid à cname
+                launchClientWork(cName);
             }
         });
 
@@ -106,9 +108,10 @@ public class ClientActivity extends ActionBarActivity {
         return clientLDR.loadInBackground();
     }
 
-    private void launchClientWork(String CID, String cName) {
+    // passage de reférence cid à cname
+    private void launchClientWork(String cName) {
         Intent CW = new Intent(this, RendezVousListActivity.class);
-        CW.putExtra("clientID",CID);
+//        CW.putExtra("clientID",CID);
         CW.putExtra("clientName",cName);
         startActivity(CW);
     }

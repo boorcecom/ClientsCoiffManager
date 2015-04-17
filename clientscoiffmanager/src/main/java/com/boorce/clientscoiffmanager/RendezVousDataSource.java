@@ -15,7 +15,7 @@ public class RendezVousDataSource {
 
     private SQLiteDatabase db;
     private CCMSQLiteHelper dbHelper;
-    private String[] allColumns = { CCMSQLiteHelper.RDV_COLUMN_UID, CCMSQLiteHelper.RDV_COLUMN_CID,
+    private String[] allColumns = { CCMSQLiteHelper.RDV_COLUMN_UID, CCMSQLiteHelper.RDV_COLUMN_CNAME,
             CCMSQLiteHelper.RDV_COLUMN_DATE, CCMSQLiteHelper.RDV_COLUMN_DESC };
 
     public RendezVousDataSource(Context ctx) {
@@ -31,9 +31,9 @@ public class RendezVousDataSource {
         dbHelper.close();
     }
 
-    public RendezVous createRendezVous(String cid, String Date, String description) {
+    public RendezVous createRendezVous(String cName, String Date, String description) {
         ContentValues values = new ContentValues();
-        values.put(CCMSQLiteHelper.RDV_COLUMN_CID,cid);
+        values.put(CCMSQLiteHelper.RDV_COLUMN_CNAME,cName);
         values.put(CCMSQLiteHelper.RDV_COLUMN_DATE,Date);
         values.put(CCMSQLiteHelper.RDV_COLUMN_DESC, description);
         long insertId = db.insert(CCMSQLiteHelper.TABLE_RENDEZVOUS, null,
@@ -50,7 +50,7 @@ public class RendezVousDataSource {
     public void updateRendezVous(RendezVous rendezVous) {
         ContentValues values = new ContentValues();
         values.put(CCMSQLiteHelper.RDV_COLUMN_UID,rendezVous.getUid());
-        values.put(CCMSQLiteHelper.RDV_COLUMN_CID,rendezVous.getCid());
+        values.put(CCMSQLiteHelper.RDV_COLUMN_CNAME,rendezVous.getCName());
         values.put(CCMSQLiteHelper.RDV_COLUMN_DATE, rendezVous.getDate());
         values.put(CCMSQLiteHelper.RDV_COLUMN_DESC, rendezVous.getDescription());
         db.update(CCMSQLiteHelper.TABLE_RENDEZVOUS,values,CCMSQLiteHelper.RDV_COLUMN_UID+"="+rendezVous.getUid(),null);
@@ -64,8 +64,9 @@ public class RendezVousDataSource {
 
     public List<RendezVous> getAllRendezVous() {
         List<RendezVous> rendezVous = new ArrayList<RendezVous>();
+// Ajout order by date
         Cursor cursor = db.query(CCMSQLiteHelper.TABLE_RENDEZVOUS,
-                allColumns, null, null, null, null, null);
+                allColumns, null, null, null, null, CCMSQLiteHelper.RDV_COLUMN_DATE+" ASC");
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             RendezVous rendezVousReturn = cursorToRendezVous(cursor);
@@ -78,7 +79,9 @@ public class RendezVousDataSource {
     }
 
     public RendezVous getRendezVousFromId(long id) {
-        Cursor cursor = db.query(CCMSQLiteHelper.TABLE_RENDEZVOUS, allColumns,CCMSQLiteHelper.RDV_COLUMN_UID+"="+id,null,null,null,null);
+// mise en forme
+        Cursor cursor = db.query(CCMSQLiteHelper.TABLE_RENDEZVOUS, allColumns,
+                CCMSQLiteHelper.RDV_COLUMN_UID+"="+id,null,null,null,null);
         if(cursor.getCount()==0) {
             return null;
         }
@@ -88,9 +91,12 @@ public class RendezVousDataSource {
         return rendezVous;
     }
 
-    public List<RendezVous> getRendezVousFromClientID(String Cid) {
+    public List<RendezVous> getRendezVousFromClientName(String cName) {
         List<RendezVous> rendezVous = new ArrayList<RendezVous>();
-        Cursor cursor = db.query(CCMSQLiteHelper.TABLE_RENDEZVOUS, allColumns,CCMSQLiteHelper.RDV_COLUMN_CID+"='"+Cid+"'",null,null,null,null);
+// Ajout order by date
+        Cursor cursor = db.query(CCMSQLiteHelper.TABLE_RENDEZVOUS, allColumns,
+                CCMSQLiteHelper.RDV_COLUMN_CNAME+"='"+cName+"'",null,null,
+                null,CCMSQLiteHelper.RDV_COLUMN_DATE+" ASC");
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             RendezVous rendezVousReturn = cursorToRendezVous(cursor);
@@ -107,7 +113,7 @@ public class RendezVousDataSource {
         Tds.open();
         RendezVous rendezVous = new RendezVous();
         rendezVous.setUid(cursor.getLong(0));
-        rendezVous.setCid(cursor.getString(1));
+        rendezVous.setCName(cursor.getString(1));
         rendezVous.setDate(cursor.getString(2));
         rendezVous.setDescription(cursor.getString(3));
         Tds.close();

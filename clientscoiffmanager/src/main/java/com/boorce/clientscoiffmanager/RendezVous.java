@@ -3,7 +3,7 @@ package com.boorce.clientscoiffmanager;
 
 public class RendezVous {
     private long uid;
-    private String cid;
+    private String cname;
     private String date;
     private String description;
 
@@ -15,12 +15,12 @@ public class RendezVous {
         this.uid=id;
     }
 
-    public String getCid() {
-        return cid;
+    public String getCName() {
+        return cname;
     }
 
-    public void setCid(String cid) {
-        this.cid=cid;
+    public void setCName(String cName) {
+        this.cname=cName;
     }
 
     public String getDate() {

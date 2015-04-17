@@ -26,12 +26,13 @@
     <string name="editSaved">Modifications sauvegardées.</string>
     <string name="addSaved">Modifications ajoutées.</string>
     <string name="unableTrvDelete">Travail encore utilisé, impossible de supprimer !</string>
-    <string name="title_activity_rendez_vous">Rendez Vous</string>
-    <string name="editRendezVous">Edition du rendezvous :</string>
-    <string name="ajoutRendezVous">Ajout d\'un rendezvous :</string>
+    <string name="title_activity_rendez_vous">Rendez-Vous</string>
+    <string name="editRendezVous">Edition du rendez-vous :</string>
+    <string name="ajoutRendezVous">Ajout d\'un rendez-vous :</string>
     <string name="travailAjoute">Travail ajouté</string>
     <string name="AjoutTravailImpossible">Aucun travail sélectionné</string>
     <string name="ajouterTravail">Ajouter un travail</string>
+    <string name="ajouterRendezVous">Ajouter un rendez-vous</string>
     <string name="travailExist">Travail déjà dans la liste</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

@@ -27,7 +27,8 @@ public class RendezVousListActivity extends ActionBarActivity {
     private Context ctx;
 
 
-    private String clientID;
+    // passage de reférence cid à cname
+//    private String clientID;
     private String clientName;
 
 
@@ -42,14 +43,17 @@ public class RendezVousListActivity extends ActionBarActivity {
         if (savedInstanceState == null) {
             extras = getIntent().getExtras();
             if(extras == null) {
-                clientID= null;
+// passage de reférence cid à cname
+//                clientID= null;
                 clientName=null;
             } else {
-                clientID= extras.getString("clientID");
+// passage de reférence cid à cname
+//                clientID= extras.getString("clientID");
                 clientName= extras.getString("clientName");
             }
         } else {
-            clientID= (String) savedInstanceState.getSerializable("clientID");
+// passage de reférence cid à cname
+//            clientID= (String) savedInstanceState.getSerializable("clientID");
             clientName= (String) savedInstanceState.getSerializable("clientName");
         }
         if(clientName==null) {
@@ -91,10 +95,10 @@ public class RendezVousListActivity extends ActionBarActivity {
     private void refreshRendezVousList() {
 
         List<RendezVous> values;
-        if(clientID==null) {
+        if(clientName==null) {
             values = CTds.getAllRendezVous();
         } else {
-            values = CTds.getRendezVousFromClientID(clientID);
+            values = CTds.getRendezVousFromClientName(clientName);
         }
         RendezVousAdapter adapter = new RendezVousAdapter(this, values);
         rendezVousList.setAdapter(adapter);
@@ -136,14 +140,16 @@ public class RendezVousListActivity extends ActionBarActivity {
     private void editRendezVous(Long uid) {
         Intent CW = new Intent(ctx, RendezVousActivity.class);
         CW.putExtra("rendezVousID",uid);
-        CW.putExtra("clientID",clientID);
+// passage de reférence cid à cname
+//        CW.putExtra("clientID",clientID);
         CW.putExtra("clientName",clientName);
         startActivity(CW);
     }
 
     private void addRendezVous() {
         Intent CW = new Intent(ctx, RendezVousActivity.class);
-        CW.putExtra("clientID",clientID);
+// passage de reférence cid à cname
+//        CW.putExtra("clientID",clientID);
         CW.putExtra("clientName",clientName);
         startActivity(CW);
     }
