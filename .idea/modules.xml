@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ClientsCoiffManager.iml" filepath="$PROJECT_DIR$/ClientsCoiffManager.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/clientscoiffmanager/clientscoiffmanager.iml" filepath="$PROJECT_DIR$/clientscoiffmanager/clientscoiffmanager.iml" />
     </modules>
   </component>
 </project>
