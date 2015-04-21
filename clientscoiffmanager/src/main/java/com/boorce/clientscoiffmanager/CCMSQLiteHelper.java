@@ -1,5 +1,7 @@
 package com.boorce.clientscoiffmanager;
 
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.Context;
@@ -25,6 +27,11 @@ public class CCMSQLiteHelper extends SQLiteOpenHelper {
     public static final String RDV_COLUMN_DATE = "date";
     public static final String RDV_COLUMN_DESC = "description";
 
+    //Timestamp global pour les backups
+    public static final String TABLE_PARAMETERS ="parametres";
+    public static final String PAR_COLUMN_ENTRY="entry";
+    public static final String PAR_COLUMN_DATA="data";
+
     // Ajout des index
     public static final String INDEX_CNAME_RENDEZVOUS ="index_rendezvous_cname";
     public static final String INDEX_DATE_RENDEZVOUS ="index_rendezvous_date";
@@ -32,7 +39,7 @@ public class CCMSQLiteHelper extends SQLiteOpenHelper {
     public static final String INDEX_RID_RDV_TRV="index_rdv_trv_rid";
 
     private static final String DATABASE_NAME = "clientcoiffmanager.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Database creation sql statement
     private static final String DATABASE_CREATE_TRAVAUX = "create table "
@@ -53,6 +60,11 @@ public class CCMSQLiteHelper extends SQLiteOpenHelper {
             + RDV_COLUMN_CNAME + " text not null, "
             + RDV_COLUMN_DATE + " text not null,"
             + RDV_COLUMN_DESC +" text);";
+
+    private static final String DATABASE_CREATE_PARAMETERS ="create table "
+            + TABLE_PARAMETERS +"(" + PAR_COLUMN_ENTRY
+            + " text not null primary key, "
+            + PAR_COLUMN_DATA +" text not null);";
 
 // Ajout des index
     private static final String DATABASE_CREATE_INDEX_CNAME_RDV = "create index "
@@ -77,6 +89,11 @@ public class CCMSQLiteHelper extends SQLiteOpenHelper {
         database.execSQL(DATABASE_CREATE_TRAVAUX);
         database.execSQL(DATABASE_CREATE_RENDEZVOUS);
         database.execSQL(DATABASE_CREATE_RDV_TRV);
+        database.execSQL(DATABASE_CREATE_PARAMETERS);
+        ContentValues values = new ContentValues();
+        values.put(PAR_COLUMN_ENTRY,"com.boorce.ccm:lastmodified");
+        values.put(PAR_COLUMN_DATA, String.valueOf(System.currentTimeMillis()));
+        database.insert(TABLE_PARAMETERS,null,values);
 // Ajout des index
         database.execSQL(DATABASE_CREATE_INDEX_CNAME_RDV);
         database.execSQL(DATABASE_CREATE_INDEX_DATE_RDV);
@@ -84,8 +101,41 @@ public class CCMSQLiteHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
         // Rien à faire, version 1 !
         //onCreate(db);
+        if(oldVersion==1) {
+            database.execSQL(DATABASE_CREATE_PARAMETERS);
+            ContentValues values = new ContentValues();
+            values.put(PAR_COLUMN_ENTRY,"com.boorce.ccm:lastmodified");
+            values.put(PAR_COLUMN_DATA, String.valueOf(System.currentTimeMillis()));
+            database.insert(TABLE_PARAMETERS,null,values);
+        }
     }
+
+    // Gestion des timestamp et des paramètres
+    static public void setLastModified(SQLiteDatabase database) {
+        ContentValues values = new ContentValues();
+        values.put(PAR_COLUMN_ENTRY,"com.boorce.ccm:lastmodified");
+        values.put(PAR_COLUMN_DATA, String.valueOf(System.currentTimeMillis()));
+        database.replace(TABLE_PARAMETERS,null,values);
+    }
+
+    static public String getParameters(SQLiteDatabase database, String parameter) {
+        String[] allColumns = { PAR_COLUMN_ENTRY, PAR_COLUMN_DATA };
+        Cursor cursor = database.query(TABLE_PARAMETERS, allColumns,
+                CCMSQLiteHelper.PAR_COLUMN_ENTRY+" like '%"+parameter+"%'",null,null,null,null);
+        cursor.moveToFirst();
+        String returnData=cursor.getString(1);
+        cursor.close();
+        return returnData;
+    }
+
+
+
+    static public Long getLastModified(SQLiteDatabase database) {
+        String timestamp=getParameters(database,"com.boorce.ccm:lastmodified");
+        return Long.parseLong(timestamp,10);
+    }
+
 }

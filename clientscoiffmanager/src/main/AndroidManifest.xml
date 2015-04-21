@@ -10,7 +10,8 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:backupAgent="BoorceCCMBackupAgent">
         <activity
             android:name=".ClientActivity"
             android:label="@string/title_activity_client" >
@@ -36,6 +37,8 @@
             android:name=".RendezVousActivity"
             android:label="@string/title_activity_rendez_vous" >
         </activity>
+        <meta-data android:name="com.google.android.backup.api_key"
+            android:value="AEdPqrEAAAAItawelNKCnbNyftixL-M2S2TvErAt0Xi4Y-zpbg"/>
     </application>
 
 </manifest>

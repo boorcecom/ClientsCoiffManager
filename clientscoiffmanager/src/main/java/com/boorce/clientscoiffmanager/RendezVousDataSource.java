@@ -44,7 +44,20 @@ public class RendezVousDataSource {
         cursor.moveToFirst();
         RendezVous newRendezVous = cursorToRendezVous(cursor);
         cursor.close();
+        CCMSQLiteHelper.setLastModified(db);
         return newRendezVous;
+    }
+
+    // Ajout pour le backup et restore.
+    public void createRendezVous(RendezVous Rdv) {
+        ContentValues values = new ContentValues();
+        values.put(CCMSQLiteHelper.RDV_COLUMN_UID,Rdv.getUid());
+        values.put(CCMSQLiteHelper.RDV_COLUMN_CNAME,Rdv.getCName());
+        values.put(CCMSQLiteHelper.RDV_COLUMN_DATE,Rdv.getDate());
+        values.put(CCMSQLiteHelper.RDV_COLUMN_DESC, Rdv.getDescription());
+        db.insert(CCMSQLiteHelper.TABLE_RENDEZVOUS, null,
+                values);
+        CCMSQLiteHelper.setLastModified(db);
     }
 
     public void updateRendezVous(RendezVous rendezVous) {
@@ -53,13 +66,21 @@ public class RendezVousDataSource {
         values.put(CCMSQLiteHelper.RDV_COLUMN_CNAME,rendezVous.getCName());
         values.put(CCMSQLiteHelper.RDV_COLUMN_DATE, rendezVous.getDate());
         values.put(CCMSQLiteHelper.RDV_COLUMN_DESC, rendezVous.getDescription());
-        db.update(CCMSQLiteHelper.TABLE_RENDEZVOUS,values,CCMSQLiteHelper.RDV_COLUMN_UID+"="+rendezVous.getUid(),null);
+        db.update(CCMSQLiteHelper.TABLE_RENDEZVOUS,values,CCMSQLiteHelper.RDV_COLUMN_UID
+                +"="+rendezVous.getUid(),null);
+        CCMSQLiteHelper.setLastModified(db);
     }
 
     public void deleteRendezVous(RendezVous clientTravail) {
         long id = clientTravail.getUid();
         db.delete(CCMSQLiteHelper.TABLE_RENDEZVOUS, CCMSQLiteHelper.RDV_COLUMN_UID
                 + " = " + id, null);
+        CCMSQLiteHelper.setLastModified(db);
+    }
+
+    public void deleteAllRendezVous() {
+        db.delete(CCMSQLiteHelper.TABLE_RENDEZVOUS,null,null);
+        CCMSQLiteHelper.setLastModified(db);
     }
 
     public List<RendezVous> getAllRendezVous() {
@@ -118,6 +139,11 @@ public class RendezVousDataSource {
         rendezVous.setDescription(cursor.getString(3));
         Tds.close();
         return rendezVous;
+    }
+
+    // Gestion des timestamps
+    public Long getLastModified() {
+        return CCMSQLiteHelper.getLastModified(db);
     }
 
 }

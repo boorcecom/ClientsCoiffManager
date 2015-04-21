@@ -41,13 +41,30 @@ public class TravauxDataSource {
         cursor.moveToFirst();
         Travaux newTravail = cursorToTravaux(cursor);
         cursor.close();
+        CCMSQLiteHelper.setLastModified(db);
         return newTravail;
+    }
+
+    // Ajout pour le backup et restore.
+    public void createTravaux(Travaux travail) {
+        ContentValues values = new ContentValues();
+        values.put(CCMSQLiteHelper.TRV_COLUMN_ID, travail.getId());
+        values.put(CCMSQLiteHelper.TRV_COLUMN_DESC, travail.getDescription());
+        db.insert(CCMSQLiteHelper.TABLE_TRAVAUX, null,
+                values);
+        CCMSQLiteHelper.setLastModified(db);
     }
 
     public void deleteTravail(Travaux travail) {
         long id = travail.getId();
         db.delete(CCMSQLiteHelper.TABLE_TRAVAUX, CCMSQLiteHelper.TRV_COLUMN_ID
                 + " = " + id, null);
+        CCMSQLiteHelper.setLastModified(db);
+    }
+
+    public void deleteAllTravaux() {
+        db.delete(CCMSQLiteHelper.TABLE_TRAVAUX,null,null);
+        CCMSQLiteHelper.setLastModified(db);
     }
 
     public void updateTravaux(Travaux travail) {
@@ -55,6 +72,7 @@ public class TravauxDataSource {
         values.put(CCMSQLiteHelper.TRV_COLUMN_ID,travail.getId());
         values.put(CCMSQLiteHelper.TRV_COLUMN_DESC, travail.getDescription());
         db.update(CCMSQLiteHelper.TABLE_TRAVAUX,values,CCMSQLiteHelper.TRV_COLUMN_ID+"="+travail.getId(),null);
+        CCMSQLiteHelper.setLastModified(db);
     }
 
     public List<Travaux> getAllTravaux() {
@@ -88,6 +106,11 @@ public class TravauxDataSource {
         travail.setId(cursor.getLong(0));
         travail.setDescription(cursor.getString(1));
         return travail;
+    }
+
+    // Gestion des timestamps
+    public Long getLastModified() {
+        return CCMSQLiteHelper.getLastModified(db);
     }
 
 }

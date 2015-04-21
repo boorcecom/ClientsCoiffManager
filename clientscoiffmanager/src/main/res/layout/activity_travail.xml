@@ -21,7 +21,9 @@
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
         android:singleLine="true"
-        android:background="@android:color/background_light" />
+        android:background="@android:color/background_light"
+        android:minLines="1"
+        android:minWidth="150dp" />
 
     <Button
         android:layout_width="wrap_content"

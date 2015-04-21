@@ -39,7 +39,18 @@ public class RdvTrvDataSource {
         cursor.moveToFirst();
         RdvTrv newRdvTrv = cursorToRdvTrv(cursor);
         cursor.close();
+        CCMSQLiteHelper.setLastModified(db);
         return newRdvTrv;
+    }
+
+    // Ajout pour le backup et restore.
+    public void createRdvTrv(RdvTrv toInsert) {
+        ContentValues values = new ContentValues();
+        values.put(CCMSQLiteHelper.RT_COLUMN_UID,toInsert.getUid());
+        values.put(CCMSQLiteHelper.RT_COLUMN_RID, toInsert.getRid());
+        values.put(CCMSQLiteHelper.RT_COLUMN_TID, toInsert.getTid());
+        db.insert(CCMSQLiteHelper.TABLE_RDV_TRV, null,values);
+        CCMSQLiteHelper.setLastModified(db);
     }
 
     public void deleteRdvTrv(RdvTrv toDelRdvTrv) {
@@ -49,18 +60,26 @@ public class RdvTrvDataSource {
     public void deleteRdvTrvAll(long rdvId, long trvId) {
         db.delete(CCMSQLiteHelper.TABLE_RDV_TRV, CCMSQLiteHelper.RT_COLUMN_RID
                 + " = " + rdvId + " AND "+ CCMSQLiteHelper.RT_COLUMN_TID +" = "+ trvId, null);
+        CCMSQLiteHelper.setLastModified(db);
+    }
+
+    public void deleteAllRdvTrv() {
+        db.delete(CCMSQLiteHelper.TABLE_RDV_TRV,null,null);
+        CCMSQLiteHelper.setLastModified(db);
     }
 
     public void deleteFirstRdvTrvFromRidTid(long rdvId, long trvId) {
         List<RdvTrv> listRdvTrv = getRdvTrvFromRidTid(rdvId,trvId);
         if(listRdvTrv.size()>0) {
             deleteRdvTrv(listRdvTrv.get(0));
+            CCMSQLiteHelper.setLastModified(db);
         }
     }
 
     public void deleteRdvTrv(long uid) {
         db.delete(CCMSQLiteHelper.TABLE_RDV_TRV, CCMSQLiteHelper.RT_COLUMN_UID
                 + " = " + uid, null);
+        CCMSQLiteHelper.setLastModified(db);
     }
 
 
@@ -128,6 +147,11 @@ public class RdvTrvDataSource {
         rdv_trv.setRid(cursor.getLong(1));
         rdv_trv.setTid(cursor.getLong(2));
         return rdv_trv;
+    }
+
+    // Gestion des timestamps
+    public Long getLastModified() {
+        return CCMSQLiteHelper.getLastModified(db);
     }
 
 }
