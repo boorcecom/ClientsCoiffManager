@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -186,6 +187,15 @@ public class RendezVousListActivity extends ActionBarActivity {
                                     RTds.deleteRdvTrv(rt);
                                 }
                                 RTds.close();
+                                PhotoDataSource Pds=new PhotoDataSource(ctx);
+                                Pds.open();
+                                List<Photo> photos=Pds.getPhotosFromRid(Long.parseLong(uid,10));
+                                for(Photo photo:photos) {
+                                    File file = new File(photo.getFilename());
+                                    file.delete();
+                                }
+                                Pds.deletePhotosFromRdv(Long.parseLong(uid,10));
+                                Pds.close();
                                 dialog.cancel();
                                 refreshRendezVousList();
                                 Toast.makeText(ctx, getString(R.string.RDVDeleted), Toast.LENGTH_SHORT).show();

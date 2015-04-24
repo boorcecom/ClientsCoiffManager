@@ -63,7 +63,6 @@ public class TravailActivity extends ActionBarActivity {
                         }
                     }
                 });
-
     }
 
     @Override

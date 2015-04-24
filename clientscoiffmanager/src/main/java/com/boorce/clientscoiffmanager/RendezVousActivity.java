@@ -3,8 +3,14 @@ package com.boorce.clientscoiffmanager;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,11 +20,18 @@ import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -27,10 +40,14 @@ public class RendezVousActivity extends ActionBarActivity {
     private TravauxDataSource Tds;
     private RdvTrvDataSource RTds;
     private RendezVousDataSource Rds;
+    private PhotoDataSource Pds;
 
     private ListView travauxList;
+    private GridView photoList;
     private TextView dateRdv;
     private EditText descText;
+
+    private String photoPath;
 
     Context ctx;
     private Long rid;
@@ -45,17 +62,18 @@ public class RendezVousActivity extends ActionBarActivity {
 
         ctx=this;
         travauxList=(ListView) (findViewById(R.id.RV_travauxList));
+        photoList=(GridView) (findViewById(R.id.RV_photoList));
         dateRdv=(TextView) (findViewById(R.id.rdvDate));
         descText=(EditText) (findViewById(R.id.RV_descText));
 
         Tds=new TravauxDataSource(ctx);
         RTds=new RdvTrvDataSource(ctx);
         Rds=new RendezVousDataSource(ctx);
+        Pds=new PhotoDataSource(ctx);
 
         Tds.open();
         RTds.open();
         Rds.open();
-
         Bundle extras;
 
         if (savedInstanceState == null) {
@@ -71,6 +89,7 @@ public class RendezVousActivity extends ActionBarActivity {
                 dateRdv.setText(rdv.getDate());
                 descText.setText(rdv.getDescription());
                 refreshTravauxList();
+                refreshPhotoList();
             } else {
                 if(!(extras==null)) {
 // passage de reférence cid à cname
@@ -94,7 +113,9 @@ public class RendezVousActivity extends ActionBarActivity {
 //            clientId= (String) savedInstanceState.getSerializable("clientId");
             clientName= (String) savedInstanceState.getSerializable("clientName");
             this.setTitle((String) savedInstanceState.getSerializable("appTitle"));
+            photoPath=(String) savedInstanceState.getSerializable("photoPath");
             refreshTravauxList();
+            refreshPhotoList();
         }
 
         // Sauvegarde des modification sur le Rendez Vous
@@ -151,7 +172,70 @@ public class RendezVousActivity extends ActionBarActivity {
                         callAddTravaux();
                     }
                 });
+
+        // Ajout d'une photo
+        (findViewById(R.id.RV_addPhotoButton)).
+                setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dispatchTakePictureIntent();
+                    }
+                });
+
+        photoList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                String filename=((TextView) v.findViewById(R.id.photoFile)).getText().toString();
+                intent.setDataAndType(Uri.parse(filename), "image/*");
+                startActivity(intent);
+            }
+        });
+
         refreshTravauxList();
+    }
+
+    // Faire une photo :
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                /* Fair quelque chose ici non ? */
+                Log.d("ERREUR", ex.getMessage());
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, 2);
+            }
+        }
+
+    }
+
+    // Créer le fichier image
+    // Adapté des tutoriaux Google
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        photoPath = "file:" + image.getAbsolutePath();
+        return image;
     }
 
     private void callAddTravaux() {
@@ -196,18 +280,46 @@ public class RendezVousActivity extends ActionBarActivity {
         RTds.open();
         Tds.open();
         Rds.open();
-        if(data!=null) {
-            if (requestCode == 1) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            if(data!=null) {
                 Long tid = Long.parseLong(data.getStringExtra("selection"), 10);
                 RTds.createRdvTrv(rid, tid);
                 Toast.makeText(ctx, getString(R.string.travailAjoute) + ":"
                         + data.getStringExtra("description"), Toast.LENGTH_SHORT).show();
                 refreshTravauxList();
             }
-            // Bug: Création multiples d'un rendez vous lors de la première édition.
-            // Correction => passer en mode édition l'activity !
-            ((CheckBox) (findViewById(R.id.RV_editMode))).setChecked(true);
+        } else if (requestCode==2 && resultCode == RESULT_OK) {
+            // Gestion de la prise de photos
+            int targetW = 48;
+            int targetH = 48;
+
+            // Get the dimensions of the bitmap
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inJustDecodeBounds = true;
+            String simplePath=photoPath.substring(6, photoPath.length());
+            BitmapFactory.decodeFile(simplePath, bmOptions);
+            int photoW = bmOptions.outWidth;
+            int photoH = bmOptions.outHeight;
+
+            // Determine how much to scale down the image
+            int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+            // Decode the image file into a Bitmap sized to fill the View
+            bmOptions.inJustDecodeBounds = false;
+            bmOptions.inSampleSize = scaleFactor;
+
+            Bitmap bitmap = BitmapFactory.decodeFile(simplePath, bmOptions);
+            Pds.open();
+
+            ByteArrayOutputStream blob = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 0, blob);
+            Pds.createPhoto(rid, photoPath, blob.toByteArray());
+            // Et maintenant rafraîchir la liste des photos !
+            refreshPhotoList();
         }
+        // Bug: Création multiples d'un rendez vous lors de la première édition.
+        // Correction => passer en mode édition l'activity !
+        ((CheckBox) (findViewById(R.id.RV_editMode))).setChecked(true);
     }
 
     @Override
@@ -217,6 +329,7 @@ public class RendezVousActivity extends ActionBarActivity {
         state.putSerializable("clientName", clientName);
 //        state.putSerializable("clientId", clientId);
         state.putSerializable("appTitle",this.getTitle().toString());
+        state.putSerializable("photoPath",this.photoPath);
     }
 
     private void end_activity()
@@ -237,6 +350,17 @@ public class RendezVousActivity extends ActionBarActivity {
             TravauxAdapter adapter = new TravauxAdapter(this, values);
             travauxList.setAdapter(adapter);
             registerForContextMenu(travauxList);
+        }
+    }
+
+    private void refreshPhotoList() {
+        if(rid!=0) {
+            Pds.open();
+            List<Photo> values = Pds.getPhotosFromRid(rid);
+            Pds.close();
+            ThumbnailsAdapter adapter = new ThumbnailsAdapter(ctx, values);
+            photoList.setAdapter(adapter);
+            registerForContextMenu(photoList);
         }
     }
 
@@ -271,18 +395,32 @@ public class RendezVousActivity extends ActionBarActivity {
         if (v.getId()==R.id.RV_travauxList) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.menu_delete, menu);
+        } else if (v.getId()==R.id.RV_photoList) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_photo_delete, menu);
         }
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        final String tid=((TextView) info.targetView.findViewById(R.id.uidText)).getText().toString();
         switch(item.getItemId()) {
             case R.id.delete:
+                String tid=((TextView) info.targetView.findViewById(R.id.uidText)).getText().toString();
                 RTds.deleteFirstRdvTrvFromRidTid(rid, Long.parseLong(tid, 10));
                 refreshTravauxList();
                 Toast.makeText(ctx, getString(R.string.TrvDeleted), Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.photo_delete:
+                Long pid=Long.parseLong(((TextView) info.targetView.findViewById(R.id.photoUid)).getText().toString(),10);
+                Pds.open();
+                Photo photo=Pds.getPhotoFromUid(pid);
+                Pds.deletePhoto(pid);
+                Pds.close();
+                File file=new File(photo.getFilename());
+                file.delete();
+                refreshPhotoList();
+                Toast.makeText(ctx, getString(R.string.PhotoDeleted), Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onContextItemSelected(item);

@@ -32,14 +32,25 @@ public class CCMSQLiteHelper extends SQLiteOpenHelper {
     public static final String PAR_COLUMN_ENTRY="entry";
     public static final String PAR_COLUMN_DATA="data";
 
+    // Table de liens RendezVous et Photos avec Thumbnail. Non sauvegardée.
+    public static final String TABLE_PHOTOS="photos";
+    public static final String PHO_COLUMN_UID="_uid";
+    public static final String PHO_COLUMN_RID="rid";
+    public static final String PHO_COLUMN_FILE="filename";
+    public static final String PHO_COLUMN_THUMBNAIL="thumbnail";
+
     // Ajout des index
     public static final String INDEX_CNAME_RENDEZVOUS ="index_rendezvous_cname";
     public static final String INDEX_DATE_RENDEZVOUS ="index_rendezvous_date";
 
     public static final String INDEX_RID_RDV_TRV="index_rdv_trv_rid";
 
+    private static final String INDEX_PHOTO_RID="index_photos_rid";
+
+
     private static final String DATABASE_NAME = "clientcoiffmanager.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
+
 
     // Database creation sql statement
     private static final String DATABASE_CREATE_TRAVAUX = "create table "
@@ -66,6 +77,13 @@ public class CCMSQLiteHelper extends SQLiteOpenHelper {
             + " text not null primary key, "
             + PAR_COLUMN_DATA +" text not null);";
 
+    private static final String DATABASE_CREATE_PHOTOS="create table "
+            + TABLE_PHOTOS + "(" + PHO_COLUMN_UID
+            + " integer primary key autoincrement, "
+            + PHO_COLUMN_RID + " integer not null, "
+            + PHO_COLUMN_FILE + " text, "
+            + PHO_COLUMN_THUMBNAIL + " blob);";
+
 // Ajout des index
     private static final String DATABASE_CREATE_INDEX_CNAME_RDV = "create index "
             + INDEX_CNAME_RENDEZVOUS + " on " + TABLE_RENDEZVOUS
@@ -79,6 +97,9 @@ public class CCMSQLiteHelper extends SQLiteOpenHelper {
             + INDEX_RID_RDV_TRV + " on " + TABLE_RDV_TRV
             + " ( " +RT_COLUMN_RID +"); ";
 
+    private static final String DATABASE_CREATE_INDEX_PHOTO_RID = " create index "
+            + INDEX_PHOTO_RID + " on " + TABLE_PHOTOS
+            + " ( " + PHO_COLUMN_RID + ");";
 
     public CCMSQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -90,14 +111,17 @@ public class CCMSQLiteHelper extends SQLiteOpenHelper {
         database.execSQL(DATABASE_CREATE_RENDEZVOUS);
         database.execSQL(DATABASE_CREATE_RDV_TRV);
         database.execSQL(DATABASE_CREATE_PARAMETERS);
+        database.execSQL(DATABASE_CREATE_PHOTOS);
         ContentValues values = new ContentValues();
         values.put(PAR_COLUMN_ENTRY,"com.boorce.ccm:lastmodified");
         values.put(PAR_COLUMN_DATA, String.valueOf(System.currentTimeMillis()));
         database.insert(TABLE_PARAMETERS,null,values);
+
 // Ajout des index
         database.execSQL(DATABASE_CREATE_INDEX_CNAME_RDV);
         database.execSQL(DATABASE_CREATE_INDEX_DATE_RDV);
         database.execSQL(DATABASE_CREATE_INDEX_RID_RDV_TRV);
+        database.execSQL(DATABASE_CREATE_INDEX_PHOTO_RID);
     }
 
     @Override
@@ -110,6 +134,11 @@ public class CCMSQLiteHelper extends SQLiteOpenHelper {
             values.put(PAR_COLUMN_ENTRY,"com.boorce.ccm:lastmodified");
             values.put(PAR_COLUMN_DATA, String.valueOf(System.currentTimeMillis()));
             database.insert(TABLE_PARAMETERS,null,values);
+            database.execSQL(DATABASE_CREATE_PHOTOS);
+            database.execSQL(DATABASE_CREATE_INDEX_PHOTO_RID);
+        } else if (oldVersion==2) {
+            database.execSQL(DATABASE_CREATE_PHOTOS);
+            database.execSQL(DATABASE_CREATE_INDEX_PHOTO_RID);
         }
     }
 

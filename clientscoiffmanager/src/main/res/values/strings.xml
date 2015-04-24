@@ -35,5 +35,6 @@
     <string name="ajouterRendezVous">Ajouter un rendez-vous</string>
     <string name="travailExist">Travail déjà dans la liste</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-
+    <string name="PhotoDeleted">Photo supprimée.</string>
+    PhotoDeleted
 </resources>
